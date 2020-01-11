@@ -102,15 +102,21 @@ function listInventory() {
         // console.log(results);
         if (err) throw err;
         let inventoryArr = [];
-        for (var i = 0; i < results.length; i++) {
+        for (let i = 0; i < results.length; i++) {
             let inventoryObj = {};
             inventoryObj.id = results[i].item_id;
             inventoryObj.product_name = results[i].product_name;
             inventoryObj.price = results[i].price;
             inventoryArr.push(inventoryObj);
         }
-        return console.log(inventoryArr);
+        return printInventory(inventoryArr);
     })
+}
+
+function printInventory(inventory) {
+    for (let i = 0; i < inventory.length; i++) {
+        console.log(`${inventory[i].id}) ${inventory[i].product_name} - ${inventory[i].price}`);
+    }
 }
 
 // function makeAuctionList() {
