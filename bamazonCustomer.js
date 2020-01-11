@@ -4,7 +4,7 @@ const inquirer = require("inquirer");
 const keys = require("./keys.js");
 const mysqlPassword = keys.mysql.pw;
 
-let totalPurch = 0;
+let totalPurch = 0.0;
 
 let connection = mysql.createConnection({
     host: "localhost",
@@ -55,15 +55,18 @@ function makePurch() {
                 type: "number",
                 message: "Input the ID of the product which you would like to purchase:",
                 name: "productID",
+                // default: 1,
                 validate: function (value) {
-                    let pass = value;
-                    let checkNum = connection.query("SELECT * FROM products ORDER BY item_id DESC LIMIT 1", function (err, res) { res[0].item_id });
-                    if (pass <= checkNum) {
+                    // let checkNum = connection.query("SELECT * FROM products", function (err, res) { });
+                    // console.log(checkNum);
+                    if (value <= 20) {
                         return true;
                     } else {
-                        return console.log(`
-Please enter a valid product ID number.`);
+                        return `
+                Please enter a valid product ID number. Press down arrow key to input 
+                `;
                     };
+
                 }
             },
             {
@@ -114,11 +117,13 @@ function checkAndUpdate(checkInv, changeInv) {
                 function (error) {
                     if (error) throw err;
                     let addTax = (parseFloat(res[0].price)) + (parseFloat(res[0].price) * 0.0725);
-                    let total = addTax.toFixed(2) * changeInv;
-                    totalPurch = totalPurch + total;
+                    let total = addTax * changeInv;
+                    let subTotal = total.toFixed(2);
+                    totalPurch += total;
+                    let displayTotal = totalPurch.toFixed(2);
                     console.log(`
-${changeInv} order(s) for ${res[0].product_name} at \u0024${total} successfully submitted. 
-Your order total is now \u0024${totalPurch}.
+${changeInv} order(s) for ${res[0].product_name} at \u0024${subTotal} successfully submitted. 
+Your order total is now \u0024${displayTotal}.
 `);
                     checkDone();
                 }
