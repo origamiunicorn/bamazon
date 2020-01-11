@@ -54,7 +54,17 @@ function makePurch() {
             {
                 type: "number",
                 message: "Input the ID of the product which you would like to purchase:",
-                name: "productID"
+                name: "productID",
+                validate: function (value) {
+                    let pass = value;
+                    let checkNum = connection.query("SELECT * FROM products ORDER BY item_id DESC LIMIT 1", function (err, res) { res[0].item_id });
+                    if (pass <= checkNum) {
+                        return true;
+                    } else {
+                        return console.log(`
+Please enter a valid product ID number.`);
+                    };
+                }
             },
             {
                 type: "number",
