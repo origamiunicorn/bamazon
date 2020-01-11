@@ -15,7 +15,8 @@ let connection = mysql.createConnection({
 connection.connect(function (err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
-    start();
+    listInventory();
+    // start();
 });
 
 function start() {
@@ -47,65 +48,76 @@ function start() {
         });
 };
 
-function postAuction() {
-    inquirer
-        .prompt([{
-            type: "input",
-            message: "What is the item you would like to submit?",
-            name: "item"
-        },
-        {
-            type: "input",
-            message: "What category would you like to place your auction in?",
-            name: "cat"
-        },
-        {
-            type: "number",
-            message: "What would you like your starting bid to be?",
-            name: "startBid"
-            validate: function (value) {
-                if (isNaN(value) === false) {
-                    return true;
-                }
-                return false;
-            }
-        }
-        ]).then(function (response) {
-            addItem(response.item, response.cat, response.startBid);
-        });
-};
+// function postAuction() {
 
-function addItem(item, cat, startBid) {
-    console.log("Adding new auction item...\n");
-    var query = connection.query(
-        "INSERT INTO auctions SET ?",
-        {
-            item_name: item,
-            category: cat,
-            start_bid: startBid || 0,
-            high_bid: startBid || 0
-        },
-        function (err, res) {
-            if (err) throw err;
-            console.log(res.affectedRows + " auction added!\n");
-            start();
-        }
-    );
-    console.log(query.sql);
-}
 
-function bidAuction() {
-    connection.query("SELECT * FROM auctions", function (err, results) {
+//     // inquirer
+//     //     .prompt([{
+//     //         type: "input",
+//     //         message: "What is the item you would like to submit?",
+//     //         name: "item"
+//     //     },
+//     //     {
+//     //         type: "input",
+//     //         message: "What category would you like to place your auction in?",
+//     //         name: "cat"
+//     //     },
+//     //     {
+//     //         type: "number",
+//     //         message: "What would you like your starting bid to be?",
+//     //         name: "startBid"
+//     //         validate: function (value) {
+//     //             if (isNaN(value) === false) {
+//     //                 return true;
+//     //             }
+//     //             return false;
+//     //         }
+//     //     }
+//     //     ]).then(function (response) {
+//     //         addItem(response.item, response.cat, response.startBid);
+//     //     });
+// };
+
+// function addItem(item, cat, startBid) {
+//     console.log("Adding new auction item...\n");
+//     var query = connection.query(
+//         "INSERT INTO auctions SET ?",
+//         {
+//             item_name: item,
+//             category: cat,
+//             start_bid: startBid || 0,
+//             high_bid: startBid || 0
+//         },
+//         function (err, res) {
+//             if (err) throw err;
+//             console.log(res.affectedRows + " auction added!\n");
+//             start();
+//         }
+//     );
+//     console.log(query.sql);
+// }
+
+function listInventory() {
+    connection.query("SELECT * FROM products", function (err, results) {
+        // console.log(results);
         if (err) throw err;
-
+        let inventoryArr = [];
+        for (var i = 0; i < results.length; i++) {
+            let inventoryObj = {};
+            inventoryObj.id = results[i].item_id;
+            inventoryObj.product_name = results[i].product_name;
+            inventoryObj.price = results[i].price;
+            inventoryArr.push(inventoryObj);
+        }
+        return console.log(inventoryArr);
     })
 }
 
-function makeAuctionList() {
-    connection.query("SELECT * FROM auctions.item_name", function (err, res) {
-        if (err) throw err;
-        for (var i = 0; i < res.length; i++) {
-            console.log(res[i].id + " | " + res[i].item_name);
-        }
-    });
-}
+// function makeAuctionList() {
+//     connection.query("SELECT * FROM auctions.item_name", function (err, res) {
+//         if (err) throw err;
+//         for (var i = 0; i < res.length; i++) {
+//             console.log(res[i].id + " | " + res[i].item_name);
+//         }
+//     });
+// }
