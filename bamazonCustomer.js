@@ -88,7 +88,8 @@ function checkAndUpdate(checkInv, changeInv) {
     connection.query("SELECT item_id,product_name,price,stock FROM products WHERE item_id LIKE " + checkInv, function (err, res) {
         if (err) throw err;
         if (changeInv > parseInt(res[0].stock)) {
-            console.log("Insufficient quantity.")
+            console.log("Insufficient quantity in stock.")
+            listInventory();
         } else {
             connection.query(
                 "UPDATE products SET ? WHERE ?",
@@ -103,12 +104,10 @@ function checkAndUpdate(checkInv, changeInv) {
                 function (error) {
                     if (error) throw err;
                     let addTax = (parseFloat(res[0].price)) + (parseFloat(res[0].price) * 0.0725);
-                    console.log(addTax);
                     let total = addTax.toFixed(2) * changeInv;
                     totalPurch = totalPurch + total;
-                    console.log(totalPurch)
                     console.log(`
-${changeInv} order(s) for ${res[0].product_name} for \u0024${total} successfully submitted. 
+${changeInv} order(s) for ${res[0].product_name} at \u0024${total} successfully submitted. 
 Your order total is now \u0024${totalPurch}.
 `);
                     checkDone();
