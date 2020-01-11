@@ -4,6 +4,8 @@ const inquirer = require("inquirer");
 const keys = require("./keys.js");
 const mysqlPassword = keys.mysql.pw;
 
+let totalPurch = 0;
+
 let connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -14,6 +16,7 @@ let connection = mysql.createConnection({
 
 connection.connect(function (err) {
     if (err) throw err;
+    console.log(``);
     listInventory();
 });
 
@@ -34,7 +37,7 @@ function listInventory() {
             }
         }
         printInventory(inventoryArr);
-        return start();
+        return makePurch();
     })
 };
 
@@ -45,7 +48,7 @@ function printInventory(inventory) {
     console.log(``);
 };
 
-function start() {
+function makePurch() {
     inquirer
         .prompt([
             {
@@ -64,8 +67,21 @@ function start() {
             let changeInv = response.unitsGet;
 
             checkAndUpdate(checkInv, changeInv);
-
-        });
+        })
+        .catch(
+            function (error) {
+                if (error.response) {
+                    console.log(error.response.data);
+                    console.log(error.response.status);
+                    console.log(error.response.headers);
+                } else if (error.request) {
+                    console.log(error.request);
+                } else {
+                    console.log("Error", error.message);
+                }
+                console.log(error.config);
+            }
+        );
 };
 
 function checkAndUpdate(checkInv, changeInv) {
@@ -86,13 +102,41 @@ function checkAndUpdate(checkInv, changeInv) {
                 ],
                 function (error) {
                     if (error) throw err;
+                    let addTax = (parseFloat(res[0].price)) + (parseFloat(res[0].price) * 0.0725);
+                    console.log(addTax);
+                    let total = addTax.toFixed(2) * changeInv;
+                    totalPurch = totalPurch + total;
+                    console.log(totalPurch)
                     console.log(`
-${changeInv} order(s) for ${res[0].product_name} successfully submitted. Your total comes to \u0024${(parseFloat(res[0].price) * 2)}.
-`
-                    );
-                    start();
+${changeInv} order(s) for ${res[0].product_name} for \u0024${total} successfully submitted. 
+Your order total is now \u0024${totalPurch}.
+`);
+                    checkDone();
                 }
             );
         }
-    })
+    });
+};
+
+function checkDone() {
+    inquirer
+        .prompt([
+            {
+                type: "confirm",
+                message: "Would you like to make another purchase?",
+                name: "newPurch",
+                default: false
+            }
+        ]).then(function (response) {
+
+            if (response.newPurch === true) {
+                console.log(``);
+                listInventory();
+            } else {
+                totalPurch = 0;
+                connection.end();
+                return;
+            }
+
+        });
 };
