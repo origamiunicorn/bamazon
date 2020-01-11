@@ -69,7 +69,7 @@ function start() {
 };
 
 function checkAndUpdate(checkInv, changeInv) {
-    connection.query("SELECT item_id,product_name,stock FROM products WHERE item_id LIKE " + checkInv, function (err, res) {
+    connection.query("SELECT item_id,product_name,price,stock FROM products WHERE item_id LIKE " + checkInv, function (err, res) {
         if (err) throw err;
         if (changeInv > parseInt(res[0].stock)) {
             console.log("Insufficient quantity.")
@@ -87,19 +87,12 @@ function checkAndUpdate(checkInv, changeInv) {
                 function (error) {
                     if (error) throw err;
                     console.log(`
-${changeInv} order(s) for ${res[0].product_name} successfully submitted.
-`);
+${changeInv} order(s) for ${res[0].product_name} successfully submitted. Your total comes to \u0024${(parseFloat(res[0].price) * 2)}.
+`
+                    );
                     start();
                 }
             );
         }
     })
-}
-// function makeAuctionList() {
-//     connection.query("SELECT * FROM auctions.item_name", function (err, res) {
-//         if (err) throw err;
-//         for (var i = 0; i < res.length; i++) {
-//             console.log(res[i].id + " | " + res[i].item_name);
-//         }
-//     });
-// }
+};
