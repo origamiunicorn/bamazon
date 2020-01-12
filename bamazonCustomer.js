@@ -22,7 +22,6 @@ connection.connect(function (err) {
 
 function listInventory() {
     connection.query("SELECT * FROM products", function (err, results) {
-        // console.log(results);
         if (err) throw err;
         let inventoryArr = [];
         for (let i = 0; i < results.length; i++) {
@@ -42,6 +41,8 @@ function listInventory() {
 };
 
 function printInventory(inventory) {
+    console.log(`ID | Product Name - Price
+----------------------------------------------`);
     for (let i = 0; i < inventory.length; i++) {
         console.log(`${inventory[i].id} | ${inventory[i].product_name} - ${inventory[i].price}`);
     }
@@ -55,15 +56,13 @@ function makePurch() {
                 type: "number",
                 message: "Input the ID of the product which you would like to purchase:",
                 name: "productID",
-                // default: 1,
                 validate: function (value) {
-                    // let checkNum = connection.query("SELECT * FROM products", function (err, res) { });
-                    // console.log(checkNum);
-                    if (value <= 20) {
+                    if (value <= 11) {
                         return true;
                     } else {
                         return `
-                Please enter a valid product ID number. Press down arrow key to input 
+Please enter a valid product ID number. 
+Press up arrow key and delete the invalid entry to input a new product ID.
                 `;
                     };
 
@@ -72,7 +71,18 @@ function makePurch() {
             {
                 type: "number",
                 message: "Input the number of units you would like to purchase:",
-                name: "unitsGet"
+                name: "unitsGet",
+                validate: function (value) {
+                    if (value <= 100) {
+                        return true;
+                    } else {
+                        return `
+Please enter a valid number. 
+Press up arrow key and delete the invalid entry to input a new quantity.
+                `;
+                    };
+
+                }
             }
         ]).then(function (response) {
 
@@ -101,7 +111,9 @@ function checkAndUpdate(checkInv, changeInv) {
     connection.query("SELECT item_id,product_name,price,stock FROM products WHERE item_id LIKE " + checkInv, function (err, res) {
         if (err) throw err;
         if (changeInv > parseInt(res[0].stock)) {
-            console.log("Insufficient quantity in stock.")
+            console.log(`
+Insufficient quantity in stock.
+`)
             listInventory();
         } else {
             connection.query(
